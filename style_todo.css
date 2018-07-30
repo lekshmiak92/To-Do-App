@@ -1,0 +1,40 @@
+.header{
+  padding-top: 15px;
+  text-align: center;
+}
+.icon-wrap{
+  padding-bottom: 35px;
+}
+.text-field{
+  width: 500px;
+  height: 30px;
+}
+.button-style{
+  margin-left: 20px;
+  width: 70px;
+  height: 30px;
+  border-radius: 5px;
+  border-style: none;
+  font-family: sans-serif;
+  background: #43c215;
+  color: #fff;
+}
+.todo-container{
+  width: 650px;
+  padding-left: 350px;
+}
+li {
+  padding-top: 20px;
+  font-size: 20px;
+  font-family: sans-serif;
+  width: 540px;
+}
+.remove-button{
+  float: right;
+  color: black;
+  background-color: #e8e8e8;
+  border-radius: 10px;
+  border-style: unset;
+  margin-top: 4px;
+}
+
