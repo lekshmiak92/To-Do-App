@@ -1,12 +1,23 @@
 $(function() {
-        var itemToBeDeleted;
-        
+        var itemIdToBeDeleted;
+        var checkedBox;
+        var checkedItem;
+        var itemIdToBeEdited;
+
         $.ajax({
           url:"https://warm-plains-44796.herokuapp.com/todos",
           type:"GET",
           success:function(apiData){
             for (i = 0; i < apiData.length; i++) {
-              $("#todo-list").append('<li id='+apiData[i].id+'>'+apiData[i].title+'<button class="remove-button">X</button></li>');
+              if (apiData[i].status==="open") {
+                $("#todo-list").append('<li id='+apiData[i].id+'><input type="checkbox">'+
+                apiData[i].title+'<button class="remove-button">X</button></li>');
+                
+              }
+              else {
+                $("#todo-list").append('<li class="strikethrough" id='+apiData[i].id+'><input type="checkbox" checked="checked">'+
+                apiData[i].title+'<button class="remove-button">X</button></li>');
+              }
             }
           },
           error: function(error){
@@ -33,10 +44,8 @@ $(function() {
               },
             success:function(apiData){
               console.log("done");
-              $("#todo-list").append('<li id='+apiData.id+'>'+apiData.title+'<button class="remove-button">X</button></li>') 
-              $('.text-field').val("");
-              
-              
+              $("#todo-list").append('<li id='+apiData.id+'><input type="checkbox">'+apiData.title+'<button class="remove-button">X</button></li>') 
+              $('.text-field').val("");        
             },
             error:function(){
               console.log("posting not done")
@@ -45,13 +54,13 @@ $(function() {
         }
   
         $("#todo-list").on('click','.remove-button',function(){
-          itemToBeDeleted=$(this).parent().attr("id");
+          itemIdToBeDeleted=$(this).parent().attr("id");
 
           $.ajax({
-            url:"https://warm-plains-44796.herokuapp.com/todos/"+itemToBeDeleted,
+            url:"https://warm-plains-44796.herokuapp.com/todos/"+itemIdToBeDeleted,
             type:"DELETE",
             success:function(){
-              $('#'+itemToBeDeleted).remove();
+              $('#'+itemIdToBeDeleted).remove();
             },
             error:function(){
               console.log("deletion not done")
@@ -66,6 +75,52 @@ $(function() {
         $("#todo-list").on('mouseout',".remove-button",function(){
           $(this).css("background-color", "#e8e8e8");
         });
+
+        $("#todo-list").on('click','input[type="checkbox"]',function(){
+          checkedItem=$(this).parent();
+          itemIdToBeEdited=checkedItem.attr('id');
+          if (checkedItem.hasClass('strikethrough')) {
+            checkedItem.removeClass("strikethrough");
+            $.ajax({
+              url:"https://warm-plains-44796.herokuapp.com/todos/"+itemIdToBeEdited,
+              type:"PUT",
+              data:
+                {"todo":
+                  {
+                    
+                    "status": "open"
+                  }
+                },
+              success:function(apiData){
+                console.log("status opened")
+              },
+              error:function(error){
+                console.log("status not updated")
+              }
+            })
+          } 
+          else {
+            checkedItem.addClass("strikethrough"); 
+            $.ajax({
+              url:"https://warm-plains-44796.herokuapp.com/todos/"+itemIdToBeEdited,
+              type:"PUT",
+              data:
+                {"todo":
+                  {
+                    
+                    "status": "closed"
+                  }
+                },
+              success:function(apiData){
+                console.log("status closed")
+              },
+              error:function(error){
+                console.log("status not updated")
+              }
+            })           
+          }
+
+        })
         
 
         $('#add-button').on('click',AddList);
@@ -74,7 +129,6 @@ $(function() {
             AddList();
           }
         });
-        
         
 
 
