@@ -8,19 +8,28 @@
   </head>
   <body>
     <div class="header">
-     <div class="icon-wrap">
-       <img  class="icon-img" src="./badge-things-to-do.png">
-     </div>
-      <input class="text-field">
-      <button id="add-button" class="button-style">Add</button>
-    </div>
-    <div class="content-wrap">
-      <div class="todo-container">
-        <ul id="todo-list">
-          
-        </ul>
+      <div class="icon-wrap">
+        <img  class="icon-img" src="./badge-things-to-do.png">
+      </div>
+      <div class="input-wrap">
+        <input class="text-field">
+        <button id="add-button" class="button-style">Add</button>
+        <!-- <button id="filter-button" class="button-style">hide completed</button> -->
       </div>
     </div>
+    
+    <div class="filter-button-bar">
+      <button id="view_all" class="button-style">All</button>
+      <button id="active_tasks" class="button-style">Active</button>
+      <button id="closed_tasks" class="button-style">Closed</button>
+    </div>
+
+    <div class="todo-container">
+      <ul id="todo-list">
+        
+      </ul>
+    </div>
+    
 
 
     <script type="text/javascript" src="./script_todo.js"></script>
