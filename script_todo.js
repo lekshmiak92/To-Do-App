@@ -1,28 +1,25 @@
 $(function() {
-  var itemIdToBeDeleted;
-  var checkedBox;
-  var checkedItem;
-  var itemIdToBeEdited;
-  var ajaxUrl="https://warm-plains-44796.herokuapp.com/todos";
-  var updateStatus;
-  var filterUrl;
+  var backendUrl="https://warm-plains-44796.herokuapp.com/todos";
+  var $todoList=$("#todo-list");
 
   function showTaskItems(apiData) {
     for (i = 0; i < apiData.length; i++) {
       if (apiData[i].status==="open") {
-        $("#todo-list").append('<li id='+apiData[i].id+'><input type="checkbox">'+
-        apiData[i].title+'<button class="remove-button">X</button></li>');
+        $todoList.append('<li id='+apiData[i].id+'><input type="checkbox" data="open">'+
+        apiData[i].title+'<button data='+apiData[i].id+' class="remove-button">X</button></li>');
         
       }
       else {
-        $("#todo-list").append('<li class="strikethrough" id='+apiData[i].id+
-          '><input type="checkbox" checked="checked">'+apiData[i].title+
-          '<button class="remove-button">X</button></li>');
+        $todoList.append('<li class="strikethrough" id='+apiData[i].id+
+          '><input type="checkbox" data="closed" checked="checked">'+apiData[i].title+
+          '<button data='+apiData[i].id+' class="remove-button">X</button></li>');
       }
     }
   }
 
-  function getTaskList(url) {
+  function getTaskList(options) {
+    var filterOptions=options || "";
+    var url=backendUrl+filterOptions;
     $.ajax({
       url:url,
       type:"GET",
@@ -38,12 +35,9 @@ $(function() {
 
   function AddList() {
     var value = $('.text-field').val();
-    if (value == "") {
-      return;
-    } 
-    else {
+    if (value !== "") {
       $.ajax({
-        url:ajaxUrl,
+        url:backendUrl,
         type:"POST",
         data:
           {"todo":
@@ -53,8 +47,8 @@ $(function() {
             }
           },
         success:function(apiData){
-          $("#todo-list").append('<li id='+apiData.id+'><input type="checkbox">'
-            +apiData.title+'<button class="remove-button">X</button></li>') 
+          $todoList.append('<li id='+apiData.id+'><input type="checkbox" data="open">'
+            +apiData.title+'<button data='+apiData.id+' class="remove-button">X</button></li>') 
           $('.text-field').val("");        
         },
         error:function(){
@@ -64,27 +58,43 @@ $(function() {
     }
   }
 
-  function updateTaskStatus(itemIdToBeEdited,updateStatus) {
+  function updateTaskStatus(checkedItem) {
+    var $item = $(checkedItem.parent());
+    var itemId=$item.attr("id");
+    var newStatus;
+    if (checkedItem.attr('data')=="closed") {
+      newStatus="open";
+    } 
+    else {
+      newStatus="closed" ;
+    }  
     $.ajax({
-        url:ajaxUrl+"/"+ itemIdToBeEdited,
-        type:"PUT",
-        data:
-          {"todo":
-            {
-              
-              "status": updateStatus
-            }
-          },
-        success:function(apiData){
-          console.log("status updated ")
+      url:backendUrl+"/"+ itemId,
+      type:"PUT",
+      data:
+        {"todo":
+          {
+            
+            "status": newStatus
+          }
         },
-        error:function(error){
-          console.log("status not updated")
+      success:function(apiData){
+        console.log("status updated ")
+        if (apiData.status == "open") {
+         $item.removeClass("strikethrough");
+        } 
+        else {
+          $item.addClass("strikethrough");
         }
-      })
+        checkedItem.attr('data',newStatus)
+      },
+      error:function(error){
+        console.log("status not updated")
+      }
+    });
   }
 
-  getTaskList(ajaxUrl);
+  getTaskList();
 
   $('#add-button').on('click',AddList);
 
@@ -94,47 +104,38 @@ $(function() {
     }
   });
   
-  $("#view_all,#active_tasks,#closed_tasks").on('click',function(event){
-    filterUrl=ajaxUrl + "?status=" + $(event.target).attr('data');
+  $(".button-filter").on('click',function(event){
+    var filterUrl;
+    filterUrl= "?status=" + $(event.target).attr('data');
     getTaskList(filterUrl);  
   });
 
-  $("#todo-list").on('click','input[type="checkbox"]',function(){
-    checkedItem=$(this).parent();
-    itemIdToBeEdited=checkedItem.attr('id');
-    if (checkedItem.hasClass('strikethrough')) {
-      checkedItem.removeClass("strikethrough");
-      updateStatus="open";
-      updateTaskStatus(itemIdToBeEdited,updateStatus);
-    } 
-    else {
-      checkedItem.addClass("strikethrough");
-      updateStatus="closed" ;
-      updateTaskStatus(itemIdToBeEdited,updateStatus);           
-    }
+  $todoList.on('click','input[type="checkbox"]',function(){
+    var checkedItem=$(this);    
+    updateTaskStatus(checkedItem);
   });
 
-  $("#todo-list").on('click','.remove-button',function(){
-    itemIdToBeDeleted=$(this).parent().attr("id");
+  $todoList.on('click','.remove-button',function(){
+    var itemId=$(this).attr("data");
+    console.log(itemId);
     $.ajax({
-      url:ajaxUrl +"/"+ itemIdToBeDeleted,
+      url:backendUrl +"/"+ itemId,
       type:"DELETE",
       success:function(){
-        $('#'+itemIdToBeDeleted).remove();
+        $("#"+itemId).remove();
       },
       error:function(){
         console.log("deletion not done")
       }
-    })
+    });
   });
 
 
-  $("#todo-list").on('mouseover',".remove-button",function(){
+  $todoList.on('mouseover',".remove-button",function(){
     $(this).css("background-color", "red");
   });
 
-  $("#todo-list").on('mouseout',".remove-button",function(){
+  $todoList.on('mouseout',".remove-button",function(){
     $(this).css("background-color", "#e8e8e8");
   });
-
 });
